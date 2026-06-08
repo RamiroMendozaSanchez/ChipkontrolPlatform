@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: sitrack-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    networks:
+      - sitrack-network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: sitrack-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - sitrack-network
+    restart: unless-stopped
+
+networks:
+  sitrack-network:
+    driver: bridge
