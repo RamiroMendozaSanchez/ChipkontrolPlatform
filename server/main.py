@@ -19,7 +19,7 @@ from utils.security import verify_password, create_session, session_expiration, 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title="Sitrack API")
+app = FastAPI(title="Sitrack API", root_path="/api")
 
 app.add_middleware(
     CORSMiddleware,
@@ -34,7 +34,7 @@ app.add_middleware(
 def scheduler():
     while True:
         logger.info("🔄 Ejecutando proceso de unidades...")
-        #process_units()
+        process_units()
         time.sleep(60)
 
 # ======================

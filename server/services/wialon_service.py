@@ -10,7 +10,7 @@ load_dotenv()
 
 BASE_URL = os.getenv("BASE_URL")
 TOKEN = os.getenv("WIALON_TOKEN")
-OSRM_BASE_URL = "https://router.project-osrm.org/route/v1/driving"
+OSRM_BASE_URL = "http://router.project-osrm.org/route/v1/driving"
 
 
 

@@ -1,10 +1,14 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import logo from "../assets/chipkontrol-logo.png";
 
 export default function Login() {
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     username: "",
@@ -13,32 +17,101 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(form.username, form.password);
-    navigate("/");
+
+    if (!form.username.trim()) {
+      toast.error("Ingresa tu usuario");
+      return;
+    }
+
+    if (!form.password.trim()) {
+      toast.error("Ingresa tu contraseña");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      await login(
+        form.username,
+        form.password
+      );
+
+      navigate("/");
+
+    } catch (error) {
+      toast.error(
+        "Usuario o contraseña incorrectos"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-  <div className="login-container">
-    <form className="login-box" onSubmit={handleSubmit}>
-      <h2>🚀 SITRACK</h2>
+    <div className="login-page">
 
-      <input
-        placeholder="Usuario"
-        onChange={(e) =>
-          setForm({ ...form, username: e.target.value })
-        }
-      />
+      <div className="login-background"></div>
 
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) =>
-          setForm({ ...form, password: e.target.value })
-        }
-      />
+      <form
+        className="login-card"
+        onSubmit={handleSubmit}
+      >
 
-      <button>Entrar</button>
-    </form>
-  </div>
-);
+        <div className="login-logo">
+          <img
+            src={logo}
+            alt="ChipKontrol"
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Usuario</label>
+
+          <input
+            className="form-control"
+            placeholder="Ingresa tu usuario"
+            value={form.username}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                username: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>Contraseña</label>
+
+          <input
+            className="form-control"
+            type="password"
+            placeholder="********"
+            value={form.password}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                password: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        <button
+          className="btn btn-primary login-btn"
+          disabled={loading}
+        >
+          {loading
+            ? "Ingresando..."
+            : "Entrar"}
+        </button>
+
+        <div className="login-footer">
+          © {new Date().getFullYear()} SITRACK
+        </div>
+
+      </form>
+
+    </div>
+  );
 }

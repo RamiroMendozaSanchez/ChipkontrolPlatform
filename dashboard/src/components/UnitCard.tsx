@@ -7,60 +7,89 @@ type Unit = {
   velocidad?: number;
 };
 
-export default function UnitCard({ unit }: { unit: Unit }) {
-  const getSpeedColor = (speed?: number) => {
-    if (!speed) return 'text-gray-400';
-    if (speed < 10) return 'text-green-400';
-    if (speed < 50) return 'text-yellow-400';
-    return 'text-red-400';
+export default function UnitCard({
+  unit,
+}: {
+  unit: Unit;
+}) {
+  const speed = unit.velocidad || 0;
+
+  const getStatus = () => {
+    if (speed === 0)
+      return {
+        text: "Detenido",
+        className: "status-stopped",
+      };
+
+    return {
+      text: "En movimiento",
+      className: "status-moving",
+    };
   };
 
-  const getStatusIndicator = (speed?: number) => {
-    if (!speed || speed === 0) {
-      return <span className="inline-block w-2 h-2 bg-gray-500 rounded-full mr-2"></span>;
-    }
-    return <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></span>;
-  };
+  const status = getStatus();
 
   return (
-    <div className="card hover:scale-105 transition-all duration-300 cursor-pointer group">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center">
-          {getStatusIndicator(unit.velocidad)}
-          <h3 className="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">
-            {unit.nombre}
-          </h3>
-        </div>
-        <span className="badge text-xs bg-blue-600/30 border border-blue-500/50">
-          {unit.grupo}
-        </span>
-      </div>
+    <div className="unit-card">
 
-      <div className="space-y-2 text-sm">
-        <div className="flex items-center text-gray-400">
-          <span className="mr-2">📱</span>
-          <span className="font-mono text-xs">{unit.imei}</span>
-        </div>
+      <div className="unit-card-header">
 
-        <div className="flex items-center text-gray-400">
-          <span className="mr-2">📍</span>
-          <span className="font-mono text-xs">
-            {unit.lat.toFixed(4)}, {unit.lon.toFixed(4)}
+        <div>
+          <h3>{unit.nombre}</h3>
+
+          <span className="unit-group">
+            📁 {unit.grupo}
           </span>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-gray-700">
-          <div className="flex items-center">
-            <span className="mr-2">🚗</span>
-            <span className={`font-bold ${getSpeedColor(unit.velocidad)}`}>
-              {unit.velocidad || 0} km/h
-            </span>
-          </div>
-          <div className="text-xs text-gray-500">
-            {unit.velocidad && unit.velocidad > 0 ? 'En movimiento' : 'Detenido'}
-          </div>
+        <div
+          className={`unit-status ${status.className}`}
+        >
+          {status.text}
         </div>
+
       </div>
+
+      <div className="unit-speed">
+
+        <span>🚗</span>
+
+        <strong>
+          {speed}
+        </strong>
+
+        <small>km/h</small>
+
+      </div>
+
+      <div className="unit-details">
+
+        <div className="unit-detail-row">
+          <span>IMEI</span>
+
+          <strong>
+            {unit.imei}
+          </strong>
+        </div>
+
+        <div className="unit-detail-row">
+          <span>Latitud</span>
+
+          <strong>
+            {unit.lat.toFixed(5)}
+          </strong>
+        </div>
+
+        <div className="unit-detail-row">
+          <span>Longitud</span>
+
+          <strong>
+            {unit.lon.toFixed(5)}
+          </strong>
+        </div>
+
+      </div>
+
     </div>
   );
 }

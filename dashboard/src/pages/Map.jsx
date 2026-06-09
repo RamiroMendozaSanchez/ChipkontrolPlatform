@@ -60,11 +60,17 @@ export default function Map() {
     }
   };
 
-  useEffect(() => {
-    if (showRoutes) {
-      fetchRoutes();
-    }
-  }, [showRoutes]);
+useEffect(() => {
+  if (!showRoutes) return;
+
+  fetchRoutes(); // carga inmediata
+
+  const interval = setInterval(() => {
+    fetchRoutes();
+  }, 60000); // cada minuto
+
+  return () => clearInterval(interval);
+}, [showRoutes]);
 
   const filteredUnits = units.filter((u) => {
     const matchGroup = groupFilter ? u.grupo === groupFilter : true;
@@ -106,6 +112,29 @@ export default function Map() {
       iconAnchor: [12, 12],
     });
   };
+
+  const getRouteColor = (imei) => {
+  const colors = [
+    "#3b82f6", // azul
+    "#310e71", // rojo
+    "#22c55e", // verde
+    "#f59e0b", // naranja
+    "#a855f7", // morado
+    "#06b6d4", // cyan
+    "#ec4899", // rosa
+    "#84cc16", // lima
+    "#f97316", // naranja fuerte
+    "#14b8a6", // teal
+  ];
+
+  let hash = 0;
+
+  for (let i = 0; i < imei.length; i++) {
+    hash = imei.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  return colors[Math.abs(hash) % colors.length];
+};
 
   return (
     <MainLayout>
@@ -218,10 +247,24 @@ export default function Map() {
               <Polyline
                 key={route.imei}
                 positions={route.ruta}
-                color="#3b82f6"
+                color={getRouteColor(route.imei)}
                 weight={3}
-                opacity={0.7}
-              />
+                opacity={0.9}
+                lineCap="round"
+                lineJoin="round"
+                
+              >
+                 <Popup>
+    <div>
+      <strong>{route.nombre}</strong>
+      <br />
+      IMEI: {route.imei}
+      <br />
+      Puntos: {route.total_puntos}
+    </div>
+  </Popup>
+              </Polyline>
+              
             ))}
 
             {filteredUnits.map((u) => (
