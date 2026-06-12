@@ -107,7 +107,7 @@ export default function Login() {
         </button>
 
         <div className="login-footer">
-          © {new Date().getFullYear()} SITRACK
+          © {new Date().getFullYear()} ChipKontrol. Todos los derechos reservados.
         </div>
 
       </form>

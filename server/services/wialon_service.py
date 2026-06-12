@@ -92,31 +92,44 @@ def process_units():
             url = f'{BASE_URL}?svc=core/search_item&params={{"id":"{unit_id}","flags":4611686018427387903}}&sid={sid}'
             res = requests.get(url)
             item = res.json().get("item")
-
+            #print(item)
             if not item or "pos" not in item:
                 continue
 
             imei = item.get("uid")
             nombre = item.get("nm")
 
-            lat = item["pos"]["y"]
-            lon = item["pos"]["x"]
-            velocidad = item["pos"]["s"]
+            lmsg = item.get("lmsg", {})
+            params = lmsg.get("p", {})
+            pos = lmsg.get("pos", item.get("pos", {}))
 
-            hora = datetime.utcfromtimestamp(item["pos"]["t"])
+            lat = pos.get("y")
+            lon = pos.get("x")
+            velocidad = pos.get("s", 0)
+            curso = pos.get("c", 0)
+            satelites = pos.get("sc", 0)
+            hora = datetime.utcfromtimestamp(
+                lmsg.get("t", item["pos"]["t"])
+            )
+            voltaje = params.get("s_asgn1")
+
 
             # 🟢 guardar estado actual con grupo
             units_collection.update_one(
                 {"imei": imei},
                 {"$set": {
-                    "imei": imei,
-                    "nombre": nombre,
-                    "lat": lat,
-                    "lon": lon,
-                    "velocidad": velocidad,
-                    "grupo": grupo,   # 👈 NUEVO
-                    "updatedAt": datetime.utcnow()
-                }},
+            "imei": imei,
+            "nombre": nombre,
+            "grupo": grupo,
+            "lat": lat,
+            "lon": lon,
+            "velocidad": velocidad,
+            "curso": curso,
+            "satelites": satelites,
+            "hora": hora,
+            "voltaje": voltaje,
+            "updatedAt": datetime.utcnow()
+        }},
                 upsert=True
             )
             
@@ -142,15 +155,18 @@ def process_units():
 
             # 🟡 histórico
             history_collection.insert_one({
-                "imei": imei,
-                "nombre": nombre,
-                "lat": lat,
-                "lon": lon,
-                "velocidad": velocidad,
-                "hora": hora,
-                "grupo": grupo  # 👈 CRÍTICO
-                #"voltaje_bateria": str(voltaje),
-                #"gps_validity": gps_validity
+                 "imei": imei,
+    "nombre": nombre,
+    "grupo": grupo,
+
+    "lat": lat,
+    "lon": lon,
+
+    "velocidad": velocidad,
+    "curso": curso,
+    "satelites": satelites,
+
+    "hora": hora,
             })
 
             print(f"✔ {nombre}")

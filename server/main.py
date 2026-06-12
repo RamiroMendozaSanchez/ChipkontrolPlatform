@@ -85,6 +85,16 @@ def only_admin(user):
     if user["role"] != "admin":
         raise HTTPException(status_code=403, detail="Solo admin")
 
+def only_admin_or_group_admin(user):
+    if user["role"] not in [
+        "admin",
+        "group_admin"
+    ]:
+        raise HTTPException(
+            status_code=403,
+            detail="No autorizado"
+        )
+
 
 def build_filter(user):
     # 👑 admin ve todo
@@ -369,13 +379,65 @@ def create_group(
         "message": "Grupo creado",
         "grupo": serialize_doc(nuevo)
     }
+
+
+@app.get("/users")
+def get_users(user=Depends(get_current_user)):
+
+    only_admin_or_group_admin(user)
+
+    filtro = {}
+
+    if user["role"] == "group_admin":
+        filtro = {
+            "grupo": user["grupo"]
+        }
+
+    users = list(
+        users_collection.find(
+            filtro,
+            {
+                "_id": 0,
+                "password": 0
+            }
+        )
+    )
+
+    return {
+        "total": len(users),
+        "data": users
+    }
+
+@app.get("/users/{username}")
+def get_user(
+    username: str,
+    user=Depends(get_current_user)
+):
+    only_admin_or_group_admin(user)
+
+    usuario = users_collection.find_one(
+        {"username": username},
+        {
+            "_id": 0,
+            "password": 0
+        }
+    )
+
+    if not usuario:
+        raise HTTPException(
+            status_code=404,
+            detail="Usuario no existe"
+        )
+
+    return usuario
+
 @app.post("/users")
 def create_user(
     payload: UserCreate,
     current_user = Depends(get_current_user)
 ):
     # 🔐 solo admin puede crear usuarios
-    only_admin(current_user)
+    only_admin_or_group_admin(current_user)
 
     # 🔎 validar duplicado
     existe = users_collection.find_one({"username": payload.username})
@@ -447,7 +509,7 @@ def patch_user(
     user = Depends(get_current_user),
     data: dict = Body(...)
 ):
-    only_admin(user)
+    only_admin_or_group_admin(user)
 
     usuario = users_collection.find_one({"username": username})
     if not usuario:
@@ -468,7 +530,7 @@ def patch_user(
 
     # 👑 role
     if "role" in data:
-        if data["role"] not in ["admin", "user"]:
+        if data["role"] not in ["admin", "user", "group_admin"]:
             raise HTTPException(status_code=400, detail="Role inválido")
         update_data["role"] = data["role"]
 
@@ -490,7 +552,7 @@ def delete_user(
     username: str,
     user = Depends(get_current_user)
 ):
-    only_admin(user)
+    only_admin_or_group_admin(user)
 
     result = users_collection.delete_one({"username": username})
 

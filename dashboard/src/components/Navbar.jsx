@@ -10,32 +10,37 @@ export default function Navbar() {
   const location = useLocation();
 
   const menuItems = [
-    {
-      label: "Dashboard",
-      icon: "📊",
-      path: "/",
-    },
-    {
-      label: "Mapa",
-      icon: "🗺️",
-      path: "/map",
-    },
-    {
-      label: "Grupos",
-      icon: "👥",
-      path: "/groups",
-    },
-    {
-      label: "Nuevo Grupo",
-      icon: "➕",
-      path: "/admin/groups/new",
-    },
-    {
-      label: "Nuevo Usuario",
-      icon: "👤",
-      path: "/admin/users/new",
-    },
-  ];
+  {
+    label: "Dashboard",
+    icon: "📊",
+    path: "/",
+    roles: ["admin", "group_admin", "user"],
+  },
+  {
+    label: "Mapa",
+    icon: "🗺️",
+    path: "/map",
+    roles: ["admin","group_admin", "user"],
+  },
+  {
+    label: "Grupos",
+    icon: "👥",
+    path: "/groups",
+    roles: ["admin"],
+  },
+  {
+    label: "Nuevo Grupo",
+    icon: "➕",
+    path: "/admin/groups/new",
+    roles: ["admin"],
+  },
+  {
+    label: "Nuevo Usuario",
+    icon: "👤",
+    path: "/admin/users/new",
+    roles: ["admin", "group_admin"],
+  },
+];
 
   return (
     <aside className="sidebar">
@@ -51,25 +56,23 @@ export default function Navbar() {
 </div>
 
         <nav className="sidebar-nav">
-
-          {menuItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() =>
-                navigate(item.path)
-              }
-              className={`nav-item ${
-                location.pathname === item.path
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <span>{item.icon}</span>
-              {item.label}
-            </button>
-          ))}
-
-        </nav>
+  {menuItems
+    .filter(item => item.roles.includes(user?.role))
+    .map((item) => (
+      <button
+        key={item.path}
+        onClick={() => navigate(item.path)}
+        className={`nav-item ${
+          location.pathname === item.path
+            ? "active"
+            : ""
+        }`}
+      >
+        <span>{item.icon}</span>
+        {item.label}
+      </button>
+    ))}
+</nav>
 
       </div>
 

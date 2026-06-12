@@ -19,53 +19,69 @@ export default function App() {
           {/* LOGIN */}
           <Route path="/login" element={<Login />} />
 
-          {/* DASHBOARD */}
           <Route
             path="/"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedRoles={[
+                  "admin",
+                  "group_admin",
+                  "user",
+                ]}
+              >
                 <Dashboard />
               </ProtectedRoute>
             }
           />
 
-          {/* MAPA */}
           <Route
             path="/map"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedRoles={["admin",
+                  "group_admin",
+                  "user",]}
+              >
                 <Map />
               </ProtectedRoute>
             }
           />
 
-          {/* GRUPOS */}
           <Route
             path="/groups"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
                 <Groups />
               </ProtectedRoute>
             }
           />
 
           <Route
-  path="/admin/groups/new"
-  element={
-    <ProtectedRoute>
-      <CreateGroup />
-    </ProtectedRoute>
-  }
-/>
+            path="/admin/groups/new"
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+              >
+                <CreateGroup />
+              </ProtectedRoute>
+            }
+          />
 
-<Route
-  path="/admin/users/new"
-  element={
-    <ProtectedRoute>
-      <CreateUser />
-    </ProtectedRoute>
-  }
-/>
+          <Route
+            path="/admin/users/new"
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "admin",
+                  "group_admin",
+                ]}
+              >
+                <CreateUser />
+              </ProtectedRoute>
+            }
+          />
 
         </Routes>
       </BrowserRouter>

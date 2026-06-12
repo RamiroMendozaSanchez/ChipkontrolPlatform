@@ -5,6 +5,23 @@ type Unit = {
   lat: number;
   lon: number;
   velocidad?: number;
+
+  curso?: number;
+  satelites?: number;
+  voltaje?: number;
+  hora?: string;
+};
+
+const formatDate = (date?: string) => {
+  if (!date) return "-";
+
+  return new Date(date).toLocaleString(
+    "es-MX",
+    {
+      dateStyle: "short",
+      timeStyle: "short",
+    }
+  );
 };
 
 export default function UnitCard({
@@ -63,32 +80,51 @@ export default function UnitCard({
       </div>
 
       <div className="unit-details">
+  <div className="unit-detail-row">
+    <span>IMEI</span>
+    <strong>{unit.imei}</strong>
+  </div>
 
-        <div className="unit-detail-row">
-          <span>IMEI</span>
+  <div className="unit-detail-row">
+    <span>Latitud</span>
+    <strong>{unit.lat.toFixed(5)}</strong>
+  </div>
 
-          <strong>
-            {unit.imei}
-          </strong>
-        </div>
+  <div className="unit-detail-row">
+    <span>Longitud</span>
+    <strong>{unit.lon.toFixed(5)}</strong>
+  </div>
 
-        <div className="unit-detail-row">
-          <span>Latitud</span>
+  <div className="unit-detail-row">
+    <span>Curso</span>
+    <strong>
+      {unit.curso ?? 0}°
+    </strong>
+  </div>
 
-          <strong>
-            {unit.lat.toFixed(5)}
-          </strong>
-        </div>
+  <div className="unit-detail-row">
+    <span>Satélites</span>
+    <strong>
+      {unit.satelites ?? "-"}
+    </strong>
+  </div>
 
-        <div className="unit-detail-row">
-          <span>Longitud</span>
+  <div className="unit-detail-row">
+    <span>Voltaje</span>
+    <strong>
+      {unit.voltaje
+        ? `${unit.voltaje} V`
+        : "-"}
+    </strong>
+  </div>
 
-          <strong>
-            {unit.lon.toFixed(5)}
-          </strong>
-        </div>
-
-      </div>
+  <div className="unit-detail-row">
+    <span>Último reporte</span>
+    <strong>
+      {formatDate(unit.hora)}
+    </strong>
+  </div>
+</div>
 
     </div>
   );
