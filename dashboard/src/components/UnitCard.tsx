@@ -46,6 +46,8 @@ export default function UnitCard({
 
   const status = getStatus();
 
+  console.log("UnitCard render", unit);
+
   return (
     <div className="unit-card">
 

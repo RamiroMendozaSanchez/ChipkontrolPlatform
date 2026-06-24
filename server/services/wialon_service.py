@@ -167,6 +167,7 @@ def process_units():
     "satelites": satelites,
 
     "hora": hora,
+    "voltaje": voltaje,
             })
 
             print(f"✔ {nombre}")

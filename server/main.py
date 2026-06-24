@@ -273,7 +273,7 @@ def get_units_live(user = Depends(get_current_user)):
     data = list(
         units_collection.find(
             filtro,
-            {"_id": 0, "imei": 1, "nombre": 1, "lat": 1, "lon": 1, "velocidad": 1, "grupo": 1}
+            {"_id": 0, "imei": 1, "nombre": 1, "lat": 1, "lon": 1, "velocidad": 1, "grupo": 1,"curso":1,"satelites":1,"voltaje":1,"hora":1}
         )
     )
 
