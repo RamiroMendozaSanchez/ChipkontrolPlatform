@@ -4,7 +4,7 @@ import UnitCard from "../components/UnitCard";
 import MainLayout from "../layouts/MainLayout";
 
 type Unit = {
-  imei: string;
+  wialon_id: number;
   nombre: string;
   grupo: string;
   lat: number;
@@ -58,7 +58,7 @@ export default function Dashboard() {
 
     const matchSearch = searchFilter
       ? u.nombre?.toLowerCase().includes(searchFilter.toLowerCase()) ||
-      u.imei?.includes(searchFilter)
+      u.wialon_id?.toString().includes(searchFilter)
       : true;
 
     return matchGroup && matchSearch;
@@ -137,7 +137,7 @@ export default function Dashboard() {
               <input
                 className="form-control"
                 type="text"
-                placeholder="Nombre o IMEI"
+                placeholder="PLACA o ID"
                 value={searchFilter}
                 onChange={(e) =>
                   setSearchFilter(e.target.value)
@@ -213,7 +213,7 @@ export default function Dashboard() {
           <div className="units-grid">
             {filteredUnits.map((u) => (
               <UnitCard
-                key={u.imei}
+                key={u.wialon_id}
                 unit={u}
               />
             ))}

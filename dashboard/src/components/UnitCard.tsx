@@ -1,5 +1,5 @@
 type Unit = {
-  imei: string;
+  wialon_id: number;
   nombre: string;
   grupo: string;
   lat: number;
@@ -83,8 +83,8 @@ export default function UnitCard({
 
       <div className="unit-details">
   <div className="unit-detail-row">
-    <span>IMEI</span>
-    <strong>{unit.imei}</strong>
+    <span>ID Wialon</span>
+    <strong>{unit.wialon_id}</strong>
   </div>
 
   <div className="unit-detail-row">

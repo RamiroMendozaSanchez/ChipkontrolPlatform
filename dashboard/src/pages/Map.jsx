@@ -34,13 +34,28 @@ export default function Map() {
   };
 
   const fetchUnits = async () => {
-    try {
-      const res = await client.get("/units/live");
-      setUnits(res.data);
-    } catch (error) {
-      console.error("Error fetching units:", error);
-    }
-  };
+  try {
+    const res = await client.get("/units/live");
+
+    const normalizedUnits = res.data.map((u) => ({
+      ...u,
+      wialon_id: Number(u.wialon_id),
+      lat: Number(u.lat),
+      lon: Number(u.lon),
+      velocidad: Number(u.velocidad) || 0,
+      curso: Number(u.curso) || 0,
+      satelites: Number(u.satelites) || 0,
+      voltaje: Number(u.voltaje) || 0,
+    }));
+
+    console.log("📡 UNIDADES LIVE:", normalizedUnits);
+
+    setUnits(normalizedUnits);
+
+  } catch (error) {
+    console.error("Error fetching units:", error);
+  }
+};
 
   const fetchGroups = async () => {
     try {
@@ -76,7 +91,7 @@ useEffect(() => {
     const matchGroup = groupFilter ? u.grupo === groupFilter : true;
     const matchSearch = search
       ? u.nombre?.toLowerCase().includes(search.toLowerCase()) ||
-        u.imei?.includes(search)
+        u.wialon_id?.toString().includes(search)
       : true;
     return matchGroup && matchSearch;
   });
@@ -113,24 +128,26 @@ useEffect(() => {
     });
   };
 
-  const getRouteColor = (imei) => {
+  const getRouteColor = (wialon_id) => {
   const colors = [
-    "#3b82f6", // azul
-    "#310e71", // rojo
-    "#22c55e", // verde
-    "#f59e0b", // naranja
-    "#a855f7", // morado
-    "#06b6d4", // cyan
-    "#ec4899", // rosa
-    "#84cc16", // lima
-    "#f97316", // naranja fuerte
-    "#14b8a6", // teal
+    "#3b82f6",
+    "#310e71",
+    "#22c55e",
+    "#f59e0b",
+    "#a855f7",
+    "#06b6d4",
+    "#ec4899",
+    "#84cc16",
+    "#f97316",
+    "#14b8a6",
   ];
+
+  const id = String(wialon_id);
 
   let hash = 0;
 
-  for (let i = 0; i < imei.length; i++) {
-    hash = imei.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
 
   return colors[Math.abs(hash) % colors.length];
@@ -181,7 +198,7 @@ useEffect(() => {
 
       <input
         className="form-control"
-        placeholder="Nombre o IMEI"
+        placeholder="PLACA o ID"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
@@ -245,9 +262,9 @@ useEffect(() => {
             {/* Rutas del día */}
             {showRoutes && routes.map((route) => (
               <Polyline
-                key={route.imei}
+                key={route.wialon_id}
                 positions={route.ruta}
-                color={getRouteColor(route.imei)}
+                color={getRouteColor(route.wialon_id)}
                 weight={3}
                 opacity={0.9}
                 lineCap="round"
@@ -258,7 +275,7 @@ useEffect(() => {
     <div>
       <strong>{route.nombre}</strong>
       <br />
-      IMEI: {route.imei}
+      ID Wialon: {route.wialon_id}
       <br />
       Puntos: {route.total_puntos}
     </div>
@@ -267,41 +284,76 @@ useEffect(() => {
               
             ))}
 
-            {filteredUnits.map((u) => (
-              <Marker 
-                key={u.imei} 
-                position={[u.lat, u.lon]}
-                icon={createCustomIcon(u.velocidad)}
+            {filteredUnits.map((u) => {
+  const velocidad = Number(u.velocidad) || 0;
+  const lat = Number(u.lat);
+  const lon = Number(u.lon);
+
+  return (
+    <Marker
+      key={u.wialon_id}
+      position={[lat, lon]}
+      icon={createCustomIcon(velocidad)}
+    >
+      <Popup>
+        <div className="min-w-[200px]">
+          <div className="font-bold text-lg mb-2">
+            {u.nombre}
+          </div>
+
+          <div className="space-y-1 text-sm">
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">
+                Grupo:
+              </span>
+
+              <span className="font-medium">
+                {u.grupo}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">
+                ID Wialon:
+              </span>
+
+              <span className="font-mono text-xs">
+                {u.wialon_id}
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">
+                Velocidad:
+              </span>
+
+              <span
+                style={{
+                  fontWeight: "bold",
+                  color: getMarkerColor(velocidad),
+                }}
               >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <div className="font-bold text-lg mb-2">{u.nombre}</div>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Grupo:</span>
-                        <span className="font-medium">{u.grupo}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">IMEI:</span>
-                        <span className="font-mono text-xs">{u.imei}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Velocidad:</span>
-                        <span className={`font-bold ${getMarkerColor(u.velocidad)}`}>
-                          {u.velocidad || 0} km/h
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Posición:</span>
-                        <span className="font-mono text-xs">
-                          {u.lat.toFixed(4)}, {u.lon.toFixed(4)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
+                {velocidad} km/h
+              </span>
+            </div>
+
+            <div className="flex justify-between">
+              <span className="text-gray-600">
+                Posición:
+              </span>
+
+              <span className="font-mono text-xs">
+                {lat.toFixed(4)}, {lon.toFixed(4)}
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </Popup>
+    </Marker>
+  );
+})}
           </MapContainer>
         </div>
       )}
